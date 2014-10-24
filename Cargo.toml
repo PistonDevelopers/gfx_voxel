@@ -14,6 +14,14 @@ tags = []
 name = "gfx_voxel"
 path = "src/lib.rs"
 
+[dependencies.image]
+
+git = "https://github.com/PistonDevelopers/image"
+
 [dependencies.vecmath]
 
 git = "https://github.com/PistonDevelopers/vecmath"
+
+[dependencies.gfx]
+
+git = "https://github.com/gfx-rs/gfx-rs"
