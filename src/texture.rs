@@ -139,6 +139,7 @@ impl AtlasBuilder {
     }
 
     /// Loads a file into the texture atlas.
+    /// Checks if the file is loaded and returns position within the atlas.
     /// The name should be specified without file extension.
     /// PNG is the only supported format.
     pub fn load(&mut self, name: &str) -> (u32, u32) {
