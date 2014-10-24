@@ -2,4 +2,18 @@
 
 name = "voxel"
 version = "0.0.1"
-authors = ["Ty Overby <ty@pre-alpha.com>"]
+authors = [
+    "Ty Overby <ty@pre-alpha.com>",
+    "eddyb",
+    "Sven Nilsen <bvssvni@gmail.com>"
+]
+tags = []
+
+[lib]
+
+name = "gfx_voxel"
+path = "src/lib.rs"
+
+[dependencies.vecmath]
+
+git = "https://github.com/PistonDevelopers/vecmath"
