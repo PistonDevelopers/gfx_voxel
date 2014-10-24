@@ -196,7 +196,8 @@ impl AtlasBuilder {
     }
 
     /// Finds the minimum alpha value in a given sub texture of the image.
-    pub fn min_alpha(&mut self, x: u32, y: u32, w: u32, h: u32) -> u8 {
+    pub fn min_alpha(&mut self, rect: [u32, ..4]) -> u8 {
+        let [x, y, w, h] = rect;
         match self.min_alpha_cache.find(&(x, y, w, h)) {
             Some(alpha) => return *alpha,
             None => {}
