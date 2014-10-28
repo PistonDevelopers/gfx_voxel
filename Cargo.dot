@@ -1,0 +1,24 @@
+digraph example3 {
+    N0[label="gfx_voxel"];
+    N1[label="image"];
+    N2[label="rust-xml"];
+    N3[label="gfx_gl"];
+    N4[label="gl_generator"];
+    N5[label="vecmath"];
+    N6[label="khronos_api"];
+    N7[label="gfx_macros"];
+    N8[label="gfx"];
+    N9[label="render"];
+    N10[label="device"];
+    N3 -> N4[label=""];
+    N8 -> N7[label=""];
+    N8 -> N9[label=""];
+    N8 -> N10[label=""];
+    N9 -> N10[label=""];
+    N0 -> N1[label=""];
+    N0 -> N5[label=""];
+    N0 -> N8[label=""];
+    N4 -> N6[label=""];
+    N4 -> N2[label=""];
+    N10 -> N3[label=""];
+}
