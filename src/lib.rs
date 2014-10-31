@@ -1,4 +1,4 @@
-#![deny(missing_doc)]
+#![deny(missing_docs)]
 #![feature(globs)]
 
 //! A voxel rendering library on top of Gfx.
