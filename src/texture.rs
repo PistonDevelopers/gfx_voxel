@@ -1,6 +1,5 @@
 //! Create textures and build texture atlas.
 
-use gfx;
 use gfx::CommandBuffer;
 use gfx::Device;
 use image;
@@ -8,6 +7,8 @@ use image::{ GenericImage, ImageBuf, MutableRefImage, Pixel, Rgba, SubImage };
 use std::collections::HashMap;
 use std::collections::hashmap::{ Occupied, Vacant };
 use std::mem;
+
+pub use gfx_texture::Texture;
 
 /// Loads RGBA image from path.
 fn load_rgba8(path: &Path) -> Result<ImageBuf<Rgba<u8>>, String> {
@@ -25,49 +26,6 @@ fn load_rgba8(path: &Path) -> Result<ImageBuf<Rgba<u8>>, String> {
             return Err(format!("Could not load '{}': {}", path.display(), e));
         }
     })
-}
-
-/// Represents a texture.
-pub struct Texture {
-    /// The Gfx texture handle.
-    pub tex: gfx::TextureHandle,
-    /// The width of the texture.
-    pub width: u32,
-    /// The height of the texture.
-    pub height: u32
-}
-
-impl Texture {
-    /// Loads image by relative file name to the asset root.
-    pub fn from_path<D: Device<C>, C: CommandBuffer>(path: &Path, d: &mut D)
-                                                     -> Result<Texture, String> {
-        Ok(Texture::from_rgba8(try!(load_rgba8(path)), d))
-    }
-
-    /// Creates a texture from RGBA image.
-    pub fn from_rgba8<D: Device<C>, C: CommandBuffer>(
-        img: ImageBuf<Rgba<u8>>,
-        d: &mut D
-    ) -> Texture {
-        let (width, height) = img.dimensions();
-
-        let mut ti = gfx::tex::TextureInfo::new();
-        ti.width = width as u16;
-        ti.height = height as u16;
-        ti.kind = gfx::tex::Texture2D;
-        ti.format = gfx::tex::RGBA8;
-
-        let tex = d.create_texture(ti).unwrap();
-        d.update_texture(&tex, &ti.to_image_info(),
-                         img.into_vec().as_slice()).unwrap();
-        d.generate_mipmap(&tex);
-
-        Texture {
-            tex: tex,
-            width: width,
-            height: height
-        }
-    }
 }
 
 /// A 256x256 image that stores colors.
