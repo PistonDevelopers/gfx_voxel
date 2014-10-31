@@ -3,6 +3,7 @@
 
 //! A voxel rendering library on top of Gfx.
 
+extern crate gfx_texture;
 extern crate gfx;
 extern crate image;
 extern crate vecmath;
