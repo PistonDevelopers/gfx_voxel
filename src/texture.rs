@@ -5,7 +5,7 @@ use gfx::Device;
 use image;
 use image::{ GenericImage, ImageBuf, MutableRefImage, Pixel, Rgba, SubImage };
 use std::collections::HashMap;
-use std::collections::hashmap::{ Occupied, Vacant };
+use std::collections::hash_map::{ Occupied, Vacant };
 use std::mem;
 
 pub use gfx_texture::Texture;
@@ -125,7 +125,7 @@ impl AtlasBuilder {
         if self.position == 0 && (uw * size >= w || uh * size >= h) {
             let old = mem::replace(&mut self.image, ImageBuf::new(w * 2, h * 2));
             let mut dest = SubImage::new(&mut self.image, 0, 0, w, h);
-            for ((_, _, a), (_, _, b)) in dest.mut_pixels().zip(old.pixels()) {
+            for ((_, _, a), (_, _, b)) in dest.pixels_mut().zip(old.pixels()) {
                 *a = b;
             }
         }
@@ -143,7 +143,7 @@ impl AtlasBuilder {
         }
 
         let mut dest = SubImage::new(&mut self.image, x * uw, y * uh, uw, uh);
-        for ((_, _, a), (_, _, b)) in dest.mut_pixels().zip(img.pixels()) {
+        for ((_, _, a), (_, _, b)) in dest.pixels_mut().zip(img.pixels()) {
             *a = b;
         }
 
