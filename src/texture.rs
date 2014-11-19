@@ -102,7 +102,7 @@ impl AtlasBuilder {
     /// The name should be specified without file extension.
     /// PNG is the only supported format.
     pub fn load(&mut self, name: &str) -> (u32, u32) {
-        match self.tile_positions.find_equiv(name) {
+        match self.tile_positions.get(name) {
             Some(pos) => return *pos,
             None => {}
         }

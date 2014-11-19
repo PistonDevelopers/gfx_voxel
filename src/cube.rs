@@ -23,9 +23,18 @@
 //!      1  -------- 0
 //! ```
 
-use std::from_str::FromStr;
+use std::str::FromStr;
 
 use vecmath::Vector3;
+
+pub use self::Face::{
+    Down,
+    Up,
+    North,
+    South,
+    West,
+    East,
+};
 
 // Cube faces (clockwise).
 pub const QUADS: &'static [[uint, ..4], ..6] = &[
