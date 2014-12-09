@@ -3,7 +3,7 @@
 use gfx::CommandBuffer;
 use gfx::Device;
 use image;
-use image::{ GenericImage, ImageBuf, MutableRefImage, Pixel, Rgba, SubImage };
+use image::{ GenericImage, ImageBuf, Pixel, Rgba, SubImage };
 use std::num::FloatMath;
 use std::collections::HashMap;
 use std::collections::hash_map::{ Occupied, Vacant };
