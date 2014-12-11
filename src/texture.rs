@@ -3,7 +3,7 @@
 use gfx::CommandBuffer;
 use gfx::Device;
 use image;
-use image::{ GenericImage, ImageBuf, Pixel, Rgba, SubImage };
+use image::{ GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };
 use std::num::FloatMath;
 use std::collections::HashMap;
 use std::collections::hash_map::{ Occupied, Vacant };
@@ -12,12 +12,12 @@ use std::mem;
 pub use gfx_texture::Texture;
 
 /// Loads RGBA image from path.
-fn load_rgba8(path: &Path) -> Result<ImageBuf<Rgba<u8>>, String> {
+fn load_rgba8(path: &Path) -> Result<RgbaImage, String> {
     Ok(match image::open(path) {
         Ok(image::ImageRgba8(img)) => img,
         Ok(image::ImageRgb8(img)) => {
             let (w, h) = img.dimensions();
-            ImageBuf::from_fn(w, h, |x, y| img.get_pixel(x, y).to_rgba())
+            ImageBuffer::from_fn(w, h, |x, y| img.get_pixel(x, y).to_rgba())
         }
         Ok(img) => {
             return Err(format!("Unsupported color type {} in '{}'",
@@ -31,7 +31,7 @@ fn load_rgba8(path: &Path) -> Result<ImageBuf<Rgba<u8>>, String> {
 
 /// A 256x256 image that stores colors.
 pub struct ColorMap {
-    image: ImageBuf<Rgba<u8>>
+    image: RgbaImage
 }
 
 impl ColorMap {
@@ -59,14 +59,14 @@ impl ColorMap {
         let x = ((1.0 - x) * 255.0) as u8;
         let y = ((1.0 - y) * 255.0) as u8;
 
-        let (r, g, b, _) = self.image.get_pixel(x as u32, y as u32).channels();
-        [r, g, b]
+        let col = self.image.get_pixel(x as u32, y as u32).channels();
+        [col[0], col[1], col[2]]
     }
 }
 
 /// Builds an atlas of textures.
 pub struct AtlasBuilder {
-    image: ImageBuf<Rgba<u8>>,
+    image: RgbaImage,
     // Base path for loading tiles.
     path: Path,
     // Size of an individual tile.
@@ -86,7 +86,7 @@ impl AtlasBuilder {
     /// Creates a new `AtlasBuilder`.
     pub fn new(path: Path, unit_width: u32, unit_height: u32) -> AtlasBuilder {
         AtlasBuilder {
-            image: ImageBuf::new(unit_width * 4, unit_height * 4),
+            image: ImageBuffer::new(unit_width * 4, unit_height * 4),
             path: path,
             unit_width: unit_width,
             unit_height: unit_height,
@@ -124,10 +124,11 @@ impl AtlasBuilder {
 
         // Expand the image buffer if necessary.
         if self.position == 0 && (uw * size >= w || uh * size >= h) {
-            let old = mem::replace(&mut self.image, ImageBuf::new(w * 2, h * 2));
-            let mut dest = SubImage::new(&mut self.image, 0, 0, w, h);
-            for ((_, _, a), (_, _, b)) in dest.pixels_mut().zip(old.pixels()) {
-                *a = b;
+            let old = mem::replace(&mut self.image, ImageBuffer::new(w * 2, h * 2));
+            for x in range(0, w) {
+                for y in range(0, h) {
+                    *self.image.get_pixel_mut(x, y) = old[(x, y)];
+                }
             }
         }
 
@@ -143,9 +144,13 @@ impl AtlasBuilder {
             self.completed_tiles_size += 1;
         }
 
-        let mut dest = SubImage::new(&mut self.image, x * uw, y * uh, uw, uh);
-        for ((_, _, a), (_, _, b)) in dest.pixels_mut().zip(img.pixels()) {
-            *a = b;
+        {
+            let [x, y, w, h] = [x * uw, y * uh, uw, uh];
+            for ix in range(0, w) {
+                for iy in range(0, h) {
+                    *self.image.get_pixel_mut(ix + x, iy + y) = img[(ix, iy)];
+                }
+            }
         }
 
         *match self.tile_positions.entry(name.to_string()) {
@@ -163,7 +168,7 @@ impl AtlasBuilder {
         }
 
         let tile = SubImage::new(&mut self.image, x, y, w, h);
-        let min_alpha = tile.pixels().map(|(_, _, p)| p.alpha())
+        let min_alpha = tile.pixels().map(|(_, _, p)| p[3])
             .min().unwrap_or(0);
         self.min_alpha_cache.insert((x, y, w, h), min_alpha);
         min_alpha
