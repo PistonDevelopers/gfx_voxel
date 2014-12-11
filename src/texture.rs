@@ -125,10 +125,9 @@ impl AtlasBuilder {
         // Expand the image buffer if necessary.
         if self.position == 0 && (uw * size >= w || uh * size >= h) {
             let old = mem::replace(&mut self.image, ImageBuffer::new(w * 2, h * 2));
-            for x in range(0, w) {
-                for y in range(0, h) {
-                    *self.image.get_pixel_mut(x, y) = old[(x, y)];
-                }
+            let mut dest = SubImage::new(&mut self.image, 0, 0, w, h);
+            for ((_, _, a), b) in dest.pixels_mut().zip(old.pixels()) {
+                *a = *b;
             }
         }
 
@@ -144,13 +143,9 @@ impl AtlasBuilder {
             self.completed_tiles_size += 1;
         }
 
-        {
-            let [x, y, w, h] = [x * uw, y * uh, uw, uh];
-            for ix in range(0, w) {
-                for iy in range(0, h) {
-                    *self.image.get_pixel_mut(ix + x, iy + y) = img[(ix, iy)];
-                }
-            }
+        let mut dest = SubImage::new(&mut self.image, x * uw, y * uh, uw, uh);
+        for ((_, _, a), b) in dest.pixels_mut().zip(img.pixels()) {
+            *a = *b;
         }
 
         *match self.tile_positions.entry(name.to_string()) {
