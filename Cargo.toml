@@ -1,18 +1,27 @@
 [package]
 
-name = "gfx_voxel"
+name = "piston3d-gfx_voxel"
 version = "0.0.1"
 authors = [
     "Ty Overby <ty@pre-alpha.com>",
     "eddyb",
     "Sven Nilsen <bvssvni@gmail.com>"
 ]
-tags = []
+tags = ["gfx", "3d", "voxel"]
+description = "A voxel rendering library on top of Gfx"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/pistondevelopers/gfx_voxel.git"
+homepage = "https://github.com/pistondevelopers/gfx_voxel"
 
 [lib]
 
 name = "gfx_voxel"
 path = "src/lib.rs"
+
+[dependencies.piston-gfx_texture]
+
+git = "https://github.com/PistonDevelopers/gfx_texture"
 
 [dependencies.image]
 
@@ -21,8 +30,4 @@ git = "https://github.com/PistonDevelopers/image"
 [dependencies.vecmath]
 
 git = "https://github.com/PistonDevelopers/vecmath"
-
-[dependencies.gfx_texture]
-
-git = "https://github.com/PistonDevelopers/gfx_texture"
 
