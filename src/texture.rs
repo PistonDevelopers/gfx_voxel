@@ -6,7 +6,7 @@ use image;
 use image::{ GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };
 use std::num::FloatMath;
 use std::collections::HashMap;
-use std::collections::hash_map::{ Occupied, Vacant };
+use std::collections::hash_map::Entry::{ Occupied, Vacant };
 use std::mem;
 
 pub use gfx_texture::Texture;
