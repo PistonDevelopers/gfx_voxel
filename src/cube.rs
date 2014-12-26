@@ -63,7 +63,7 @@ pub const VERTICES: &'static [Vector3<f32>, ..8] = &[
 
 /// A value representing face direction.
 #[repr(uint)]
-#[deriving(PartialEq, Eq, FromPrimitive, Show)]
+#[deriving(Copy, PartialEq, Eq, FromPrimitive, Show)]
 pub enum Face {
     /// Facing down.
     Down = 0,
@@ -133,6 +133,7 @@ impl FromStr for Face {
 }
 
 /// Iterates through each face on a cube.
+#[deriving(Copy)]
 pub struct FaceIterator {
     face: uint,
 }

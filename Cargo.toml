@@ -7,7 +7,7 @@ authors = [
     "eddyb",
     "Sven Nilsen <bvssvni@gmail.com>"
 ]
-tags = ["gfx", "3d", "voxel"]
+keywords = ["gfx", "3d", "voxel"]
 description = "A voxel rendering library on top of Gfx"
 license = "MIT"
 readme = "README.md"
