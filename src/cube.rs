@@ -23,6 +23,7 @@
 //!      1  -------- 0
 //! ```
 
+use std::num::FromPrimitive;
 use std::str::FromStr;
 
 use vecmath::Vector3;
@@ -37,7 +38,7 @@ pub use self::Face::{
 };
 
 // Cube faces (clockwise).
-pub const QUADS: &'static [[uint, ..4], ..6] = &[
+pub const QUADS: &'static [[usize; 4]; 6] = &[
     [1, 0, 5, 4], // down
     [7, 6, 3, 2], // up
     [0, 1, 2, 3], // north
@@ -47,7 +48,7 @@ pub const QUADS: &'static [[uint, ..4], ..6] = &[
 ];
 
 // Cube vertices.
-pub const VERTICES: &'static [Vector3<f32>, ..8] = &[
+pub const VERTICES: &'static [Vector3<f32>; 8] = &[
     // This is the north surface
     [0.0, 0.0, 0.0], // 0
     [1.0, 0.0, 0.0], // 1
@@ -62,8 +63,8 @@ pub const VERTICES: &'static [Vector3<f32>, ..8] = &[
 ];
 
 /// A value representing face direction.
-#[repr(uint)]
-#[deriving(Copy, PartialEq, Eq, FromPrimitive, Show)]
+#[repr(usize)]
+#[derive(Copy, PartialEq, Eq, FromPrimitive, Show)]
 pub enum Face {
     /// Facing down.
     Down = 0,
@@ -81,19 +82,19 @@ pub enum Face {
 
 impl Face {
     /// Computes vertices of the face.
-    pub fn vertices(self, base: Vector3<f32>, scale: Vector3<f32>) -> [Vector3<f32>, ..4] {
+    pub fn vertices(self, base: Vector3<f32>, scale: Vector3<f32>) -> [Vector3<f32>; 4] {
         use array::*;
 
         let [x, y, z] = base;
         let [sx, sy, sz] = scale;
 
-        QUADS[self as uint].map(|i| VERTICES[i]).map(|[vx, vy, vz]| {
+        QUADS[self as usize].map(|i| VERTICES[i]).map(|[vx, vy, vz]| {
             [x + sx * vx, y + sy * vy, z + sz * vz]
         })
     }
 
     /// Gets the direction of face.
-    pub fn direction(self) -> [i32, ..3] {
+    pub fn direction(self) -> [i32; 3] {
         match self {
             Down => [0, -1, 0],
             Up => [0, 1, 0],
@@ -105,7 +106,7 @@ impl Face {
     }
 
     /// Gets the face in a specific direction.
-    pub fn from_direction(d: [i32, ..3]) -> Option<Face> {
+    pub fn from_direction(d: [i32; 3]) -> Option<Face> {
         Some(match d {
             [0, -1, 0] => Down,
             [0, 1, 0] => Up,
@@ -133,9 +134,9 @@ impl FromStr for Face {
 }
 
 /// Iterates through each face on a cube.
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FaceIterator {
-    face: uint,
+    face: usize,
 }
 
 impl FaceIterator {
@@ -147,7 +148,9 @@ impl FaceIterator {
     }
 }
 
-impl Iterator<Face> for FaceIterator {
+impl Iterator for FaceIterator {
+    type Item = Face;
+
     fn next(&mut self) -> Option<Face> {
         match self.face {
             x if x < 6 => {

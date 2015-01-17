@@ -4,7 +4,7 @@ use gfx::CommandBuffer;
 use gfx::Device;
 use image;
 use image::{ GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };
-use std::num::FloatMath;
+use std::num::Float;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry::{ Occupied, Vacant };
 use std::mem;
@@ -17,14 +17,16 @@ fn load_rgba8(path: &Path) -> Result<RgbaImage, String> {
         Ok(image::ImageRgba8(img)) => img,
         Ok(image::ImageRgb8(img)) => {
             let (w, h) = img.dimensions();
-            ImageBuffer::from_fn(w, h, |x, y| img.get_pixel(x, y).to_rgba())
+            // We're forced to use Box::new on the closure because ImageBuffer
+            // is defined in the "image" crate.
+            ImageBuffer::from_fn(w, h, Box::new(|&: x, y| img.get_pixel(x, y).to_rgba()))
         }
         Ok(img) => {
-            return Err(format!("Unsupported color type {} in '{}'",
+            return Err(format!("Unsupported color type {:?} in '{}'",
                 img.color(), path.display()));
         }
         Err(e)  => {
-            return Err(format!("Could not load '{}': {}", path.display(), e));
+            return Err(format!("Could not load '{}': {:?}", path.display(), e));
         }
     })
 }
@@ -47,7 +49,7 @@ impl ColorMap {
     }
 
     /// Gets RGB color from the color map.
-    pub fn get(&self, x: f32, y: f32) -> [u8, ..3] {
+    pub fn get(&self, x: f32, y: f32) -> [u8; 3] {
         // Clamp to [0.0, 1.0].
         let x = x.max(0.0).min(1.0);
         let y = y.max(0.0).min(1.0);
@@ -169,12 +171,12 @@ impl AtlasBuilder {
 
         *match self.tile_positions.entry(name.to_string()) {
             Occupied(entry) => entry.into_mut(),
-            Vacant(entry) => entry.set((x * uw, y * uh))
+            Vacant(entry) => entry.insert((x * uw, y * uh))
         }
     }
 
     /// Finds the minimum alpha value in a given sub texture of the image.
-    pub fn min_alpha(&mut self, rect: [u32, ..4]) -> u8 {
+    pub fn min_alpha(&mut self, rect: [u32; 4]) -> u8 {
         let [x, y, w, h] = rect;
         match self.min_alpha_cache.get(&(x, y, w, h)) {
             Some(alpha) => return *alpha,
