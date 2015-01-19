@@ -120,7 +120,7 @@ impl Face {
 }
 
 impl FromStr for Face {
-    fn from_str(s: &str) -> Option<Face> {
+    pub fn from_str(s: &str) -> Option<Face> {
         Some(match s {
             "down" => Down,
             "up" => Up,
