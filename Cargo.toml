@@ -31,3 +31,5 @@ git = "https://github.com/PistonDevelopers/image"
 
 git = "https://github.com/PistonDevelopers/vecmath"
 
+[dependencies.gfx]
+git = "https://github.com/gfx-rs/gfx-rs"
