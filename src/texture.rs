@@ -192,6 +192,6 @@ impl AtlasBuilder {
 
     /// Returns the complete texture atlas as a texture.
     pub fn complete<D: Device>(self, d: &mut D) -> Texture {
-        Texture::from_rgba8::<D>(self.image, d)
+        Texture::from_rgba8(self.image, d)
     }
 }
