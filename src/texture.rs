@@ -131,7 +131,7 @@ impl AtlasBuilder {
                 for iy in range(0, h) {
                     *self.image.get_pixel_mut(ix, iy) = old[(ix, iy)];
                 }
-            }            
+            }
 
             /*
             let mut dest = SubImage::new(&mut self.image, 0, 0, w, h);
@@ -161,7 +161,7 @@ impl AtlasBuilder {
                 }
             }
         }
-        
+
         /*
         let mut dest = SubImage::new(&mut self.image, x * uw, y * uh, uw, uh);
         for ((_, _, a), b) in dest.pixels_mut().zip(img.pixels()) {
@@ -191,7 +191,7 @@ impl AtlasBuilder {
     }
 
     /// Returns the complete texture atlas as a texture.
-    pub fn complete<D: Device<C>, C: CommandBuffer>(self, d: &mut D) -> Texture {
-        Texture::from_rgba8(self.image, d)
+    pub fn complete<D: Device>(self, d: &mut D) -> Texture {
+        Texture::from_rgba8::<D>(self.image, d)
     }
 }
