@@ -1,6 +1,5 @@
 //! Create textures and build texture atlas.
 
-use gfx::CommandBuffer;
 use gfx::Device;
 use image;
 use image::{ GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };

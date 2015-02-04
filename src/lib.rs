@@ -1,4 +1,5 @@
 #![deny(missing_docs)]
+#![feature(core, path, std_misc)]
 
 //! A voxel rendering library on top of Gfx.
 
