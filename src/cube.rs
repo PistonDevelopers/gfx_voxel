@@ -64,7 +64,7 @@ pub const VERTICES: &'static [Vector3<f32>; 8] = &[
 
 /// A value representing face direction.
 #[repr(usize)]
-#[derive(Copy, PartialEq, Eq, FromPrimitive, Show)]
+#[derive(Copy, PartialEq, Eq, FromPrimitive, Debug)]
 pub enum Face {
     /// Facing down.
     Down = 0,
