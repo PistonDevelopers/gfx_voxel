@@ -119,17 +119,22 @@ impl Face {
     }
 }
 
+#[allow(missing_docs)]
+#[derive(Debug, Clone, PartialEq, Copy)]
+pub struct ParseError;
+
 impl FromStr for Face {
-    fn from_str(s: &str) -> Option<Face> {
-        Some(match s {
-            "down" => Down,
-            "up" => Up,
-            "north" => North,
-            "south" => South,
-            "west" => West,
-            "east" => East,
-            _ => return None
-        })
+    type Err = ParseError;
+    fn from_str(s: &str) -> Result<Face, ParseError> {
+        match s {
+            "down" => Ok(Down),
+            "up" => Ok(Up),
+            "north" => Ok(North),
+            "south" => Ok(South),
+            "west" => Ok(West),
+            "east" => Ok(East),
+            _ => return Err(ParseError)
+        }
     }
 }
 
