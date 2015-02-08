@@ -9,7 +9,7 @@ pub trait Array<T> {
     /// Creates an array from an iterator.
     /// Will fail if the iterator does not contain enough elements.
     fn from_iter<I: Iterator<Item=T>>(mut iter: I) -> Self where Self: Sized {
-        Array::from_fn(|&mut:_| { iter.next().unwrap() })
+        Array::from_fn(|_| { iter.next().unwrap() })
     }
 }
 
