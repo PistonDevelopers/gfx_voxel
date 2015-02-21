@@ -1,8 +1,7 @@
 //! Create textures and build texture atlas.
 
 use gfx::Device;
-use image;
-use image::{ GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };
+use image::{ self, GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };
 use std::num::Float;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry::{ Occupied, Vacant };
@@ -18,7 +17,7 @@ fn load_rgba8(path: &Path) -> Result<RgbaImage, String> {
             let (w, h) = img.dimensions();
             // We're forced to use Box::new on the closure because ImageBuffer
             // is defined in the "image" crate.
-            ImageBuffer::from_fn(w, h, Box::new(|&: x, y| img.get_pixel(x, y).to_rgba()))
+            ImageBuffer::from_fn(w, h, |&: x, y| img.get_pixel(x, y).to_rgba())
         }
         Ok(img) => {
             return Err(format!("Unsupported color type {:?} in '{}'",
@@ -191,6 +190,6 @@ impl AtlasBuilder {
 
     /// Returns the complete texture atlas as a texture.
     pub fn complete<D: Device>(self, d: &mut D) -> Texture {
-        Texture::from_rgba8(self.image, d)
+        Texture::from_image_with_mipmap(d, &self.image)
     }
 }
