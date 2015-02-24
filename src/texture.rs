@@ -189,7 +189,7 @@ impl AtlasBuilder {
     }
 
     /// Returns the complete texture atlas as a texture.
-    pub fn complete<D: Device>(self, d: &mut D) -> Texture {
+    pub fn complete<D: Device>(self, d: &mut D) -> Texture<D> {
         Texture::from_image_with_mipmap(d, &self.image)
     }
 }
