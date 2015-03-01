@@ -17,7 +17,7 @@ fn load_rgba8(path: &Path) -> Result<RgbaImage, String> {
             let (w, h) = img.dimensions();
             // We're forced to use Box::new on the closure because ImageBuffer
             // is defined in the "image" crate.
-            ImageBuffer::from_fn(w, h, |&: x, y| img.get_pixel(x, y).to_rgba())
+            ImageBuffer::from_fn(w, h, |x, y| img.get_pixel(x, y).to_rgba())
         }
         Ok(img) => {
             return Err(format!("Unsupported color type {:?} in '{}'",
