@@ -8,6 +8,7 @@ use std::collections::hash_map::Entry::{ Occupied, Vacant };
 use std::mem;
 
 pub use gfx_texture::Texture;
+pub use gfx_texture::ImageSize;
 
 /// Loads RGBA image from path.
 fn load_rgba8(path: &Path) -> Result<RgbaImage, String> {
