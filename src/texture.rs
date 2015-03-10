@@ -1,6 +1,6 @@
 //! Create textures and build texture atlas.
 
-use gfx::Device;
+use gfx::{ Resources, Factory };
 use image::{ self, GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };
 use std::num::Float;
 use std::collections::HashMap;
@@ -190,7 +190,7 @@ impl AtlasBuilder {
     }
 
     /// Returns the complete texture atlas as a texture.
-    pub fn complete<D: Device>(self, d: &mut D) -> Texture<D> {
-        Texture::from_image_with_mipmap(d, &self.image)
+    pub fn complete<R: Resources, D: Factory<R>>(self, device: &mut D) -> Texture<R> {
+        Texture::from_image_with_mipmap(device, &self.image)
     }
 }

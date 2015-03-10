@@ -160,7 +160,7 @@ impl Iterator for FaceIterator {
         match self.face {
             x if x < 6 => {
                 self.face += 1;
-                FromPrimitive::from_uint(x)
+                FromPrimitive::from_usize(x)
             },
             _ => None
         }
