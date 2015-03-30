@@ -85,11 +85,12 @@ impl Face {
     pub fn vertices(self, base: Vector3<f32>, scale: Vector3<f32>) -> [Vector3<f32>; 4] {
         use array::*;
 
-        let [x, y, z] = base;
-        let [sx, sy, sz] = scale;
-
-        QUADS[self as usize].map(|i| VERTICES[i]).map(|[vx, vy, vz]| {
-            [x + sx * vx, y + sy * vy, z + sz * vz]
+        QUADS[self as usize].map(|i| VERTICES[i]).map(|v| {
+            [
+                base[0] + scale[0] * v[0],
+                base[1] + scale[1] * v[1],
+                base[2] + scale[2] * v[2]
+            ]
         })
     }
 
@@ -107,13 +108,13 @@ impl Face {
 
     /// Gets the face in a specific direction.
     pub fn from_direction(d: [i32; 3]) -> Option<Face> {
-        Some(match d {
-            [0, -1, 0] => Down,
-            [0, 1, 0] => Up,
-            [0, 0, -1] => North,
-            [0, 0, 1] => South,
-            [-1, 0, 0] => West,
-            [1, 0, 0] => East,
+        Some(match (d[0], d[1], d[2]) {
+            (0, -1, 0) => Down,
+            (0, 1, 0) => Up,
+            (0, 0, -1) => North,
+            (0, 0, 1) => South,
+            (-1, 0, 0) => West,
+            (1, 0, 0) => East,
             _ => return None
         })
     }

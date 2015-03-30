@@ -6,6 +6,7 @@ use std::num::Float;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry::{ Occupied, Vacant };
 use std::mem;
+use std::path::{ Path, PathBuf };
 
 pub use gfx_texture::Texture;
 pub use gfx_texture::ImageSize;
@@ -69,7 +70,7 @@ impl ColorMap {
 pub struct AtlasBuilder {
     image: RgbaImage,
     // Base path for loading tiles.
-    path: Path,
+    path: PathBuf,
     // Size of an individual tile.
     unit_width: u32,
     unit_height: u32,
@@ -85,7 +86,7 @@ pub struct AtlasBuilder {
 
 impl AtlasBuilder {
     /// Creates a new `AtlasBuilder`.
-    pub fn new(path: Path, unit_width: u32, unit_height: u32) -> AtlasBuilder {
+    pub fn new(path: PathBuf, unit_width: u32, unit_height: u32) -> AtlasBuilder {
         AtlasBuilder {
             image: ImageBuffer::new(unit_width * 4, unit_height * 4),
             path: path,
@@ -126,8 +127,8 @@ impl AtlasBuilder {
         // Expand the image buffer if necessary.
         if self.position == 0 && (uw * size >= w || uh * size >= h) {
             let old = mem::replace(&mut self.image, ImageBuffer::new(w * 2, h * 2));
-            for ix in range(0, w) {
-                for iy in range(0, h) {
+            for ix in 0 .. w {
+                for iy in 0 .. h {
                     *self.image.get_pixel_mut(ix, iy) = old[(ix, iy)];
                 }
             }
@@ -153,9 +154,9 @@ impl AtlasBuilder {
         }
 
         {
-            let [x, y, w, h] = [x * uw, y * uh, uw, uh];
-            for ix in range(0, w) {
-                for iy in range(0, h) {
+            let (x, y, w, h) = (x * uw, y * uh, uw, uh);
+            for ix in 0 .. w {
+                for iy in 0 .. h {
                     *self.image.get_pixel_mut(ix + x, iy + y) = img[(ix, iy)];
                 }
             }
@@ -176,7 +177,10 @@ impl AtlasBuilder {
 
     /// Finds the minimum alpha value in a given sub texture of the image.
     pub fn min_alpha(&mut self, rect: [u32; 4]) -> u8 {
-        let [x, y, w, h] = rect;
+        let x = rect[0];
+        let y = rect[1];
+        let w = rect[2];
+        let h = rect[3];
         match self.min_alpha_cache.get(&(x, y, w, h)) {
             Some(alpha) => return *alpha,
             None => {}
