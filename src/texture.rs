@@ -1,50 +1,74 @@
 //! Create textures and build texture atlas.
 
-use gfx::{ Resources, Factory };
-use image::{ self, GenericImage, ImageBuffer, RgbaImage, Pixel, SubImage };
-use std::num::Float;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry::{ Occupied, Vacant };
-use std::mem;
+use std::fmt::{ Debug, Formatter, Error };
 use std::path::{ Path, PathBuf };
+use std::mem;
+
+use gfx;
+use image::{
+    self,
+    ImageBuffer,
+    RgbaImage,
+    DynamicImage,
+    ImageResult,
+    SubImage,
+    ImageError,
+    GenericImage,
+    Pixel
+};
 
 pub use gfx_texture::Texture;
 pub use gfx_texture::ImageSize;
+pub use gfx_texture::Settings as TextureSettings;
 
-/// Loads RGBA image from path.
-fn load_rgba8(path: &Path) -> Result<RgbaImage, String> {
-    Ok(match image::open(path) {
-        Ok(image::ImageRgba8(img)) => img,
-        Ok(image::ImageRgb8(img)) => {
-            let (w, h) = img.dimensions();
-            // We're forced to use Box::new on the closure because ImageBuffer
-            // is defined in the "image" crate.
-            ImageBuffer::from_fn(w, h, |x, y| img.get_pixel(x, y).to_rgba())
-        }
-        Ok(img) => {
-            return Err(format!("Unsupported color type {:?} in '{}'",
-                img.color(), path.display()));
-        }
-        Err(e)  => {
-            return Err(format!("Could not load '{}': {:?}", path.display(), e));
-        }
+// Loads RGBA image from path.
+fn load_rgba8(path: &Path) -> ImageResult<RgbaImage> {
+    image::open(path).map(|img| match img {
+        DynamicImage::ImageRgba8(img) => img,
+        img => img.to_rgba()
     })
 }
 
-/// A 256x256 image that stores colors.
-pub struct ColorMap {
-    image: RgbaImage
+/// An enumeration of ColorMap errors.
+pub enum ColorMapError {
+    /// The image opening error.
+    Img(ImageError),
+
+    /// The image size error.
+    Size(u32, u32, String)
 }
+
+impl Debug for ColorMapError {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        match *self {
+            ColorMapError::Img(ref e) => e.fmt(f),
+            ColorMapError::Size(w, h, ref path) =>
+                format!("ColorMap expected 256x256, found {}x{} in '{}'", w, h, path).fmt(f)
+        }
+    }
+}
+
+impl From<ImageError> for ColorMapError {
+    fn from(img_err: ImageError) -> Self {
+        ColorMapError::Img(img_err)
+    }
+}
+
+/// A 256x256 image that stores colors.
+pub struct ColorMap(RgbaImage);
 
 impl ColorMap {
     /// Creates a new `ColorMap` from path.
-    pub fn from_path(path: &Path) -> Result<ColorMap, String> {
-        let img = try!(load_rgba8(path));
+    pub fn from_path<P>(path: P) -> Result<Self, ColorMapError>
+        where P: AsRef<Path>
+    {
+        let img = try!(load_rgba8(path.as_ref()));
 
         match img.dimensions() {
-            (256, 256) => Ok(ColorMap {image: img}),
-            (w, h) => Err(format!("ColorMap expected 256x256, found {}x{} in '{}'",
-                                  w, h, path.display()))
+            (256, 256) => Ok(ColorMap(img)),
+            (w, h) => Err(ColorMapError::Size(w, h, path.as_ref().display().to_string()))
         }
     }
 
@@ -61,7 +85,7 @@ impl ColorMap {
         let x = ((1.0 - x) * 255.0) as u8;
         let y = ((1.0 - y) * 255.0) as u8;
 
-        let col = self.image.get_pixel(x as u32, y as u32).channels();
+        let col = self.0.get_pixel(x as u32, y as u32).channels();
         [col[0], col[1], col[2]]
     }
 }
@@ -86,10 +110,12 @@ pub struct AtlasBuilder {
 
 impl AtlasBuilder {
     /// Creates a new `AtlasBuilder`.
-    pub fn new(path: PathBuf, unit_width: u32, unit_height: u32) -> AtlasBuilder {
+    pub fn new<P>(path: P, unit_width: u32, unit_height: u32) -> Self
+        where P: Into<PathBuf>
+    {
         AtlasBuilder {
             image: ImageBuffer::new(unit_width * 4, unit_height * 4),
-            path: path,
+            path: path.into(),
             unit_width: unit_width,
             unit_height: unit_height,
             completed_tiles_size: 0,
@@ -104,9 +130,8 @@ impl AtlasBuilder {
     /// The name should be specified without file extension.
     /// PNG is the only supported format.
     pub fn load(&mut self, name: &str) -> (u32, u32) {
-        match self.tile_positions.get(name) {
-            Some(pos) => return *pos,
-            None => {}
+        if let Some(&pos) = self.tile_positions.get(name) {
+            return pos
         }
 
         let mut path = self.path.join(name);
@@ -181,20 +206,20 @@ impl AtlasBuilder {
         let y = rect[1];
         let w = rect[2];
         let h = rect[3];
-        match self.min_alpha_cache.get(&(x, y, w, h)) {
-            Some(alpha) => return *alpha,
-            None => {}
+        if let Some(&alpha) = self.min_alpha_cache.get(&(x, y, w, h)) {
+            return alpha
         }
 
         let tile = SubImage::new(&mut self.image, x, y, w, h);
-        let min_alpha = tile.pixels().map(|(_, _, p)| p[3])
-            .min().unwrap_or(0);
+        let min_alpha = tile.pixels().map(|(_, _, p)| p[3]).min().unwrap_or(0);
         self.min_alpha_cache.insert((x, y, w, h), min_alpha);
         min_alpha
     }
 
     /// Returns the complete texture atlas as a texture.
-    pub fn complete<R: Resources, D: Factory<R>>(self, device: &mut D) -> Texture<R> {
-        Texture::from_image_with_mipmap(device, &self.image)
+    pub fn complete<R, D>(self, device: &mut D) -> Texture<R>
+        where R: gfx::Resources, D: gfx::Factory<R>
+    {
+        Texture::from_image(device, &self.image, false, true)
     }
 }

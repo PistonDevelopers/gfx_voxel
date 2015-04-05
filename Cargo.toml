@@ -7,7 +7,7 @@ authors = [
     "eddyb",
     "Sven Nilsen <bvssvni@gmail.com>"
 ]
-keywords = ["gfx", "3d", "voxel"]
+keywords = ["gfx", "3d", "voxel", "piston"]
 description = "A voxel rendering library on top of Gfx"
 license = "MIT"
 readme = "README.md"
@@ -17,7 +17,6 @@ homepage = "https://github.com/pistondevelopers/gfx_voxel"
 [lib]
 
 name = "gfx_voxel"
-path = "src/lib.rs"
 
 [dependencies.piston-gfx_texture]
 git = "https://github.com/PistonDevelopers/gfx_texture"
@@ -25,10 +24,6 @@ git = "https://github.com/PistonDevelopers/gfx_texture"
 
 [dependencies.image]
 git = "https://github.com/PistonDevelopers/image"
-#version = "0.0.0"
-
-[dependencies.vecmath]
-git = "https://github.com/PistonDevelopers/vecmath"
 #version = "0.0.0"
 
 [dependencies.array]
