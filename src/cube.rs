@@ -23,10 +23,10 @@
 //!      1  -------- 0
 //! ```
 
-use std::num::FromPrimitive;
 use std::str::FromStr;
 
-use vecmath::Vector3;
+/// A 3D vector.
+pub type Vector3<T> = [T; 3];
 
 pub use self::Face::{
     Down,
@@ -64,20 +64,20 @@ pub const VERTICES: &'static [Vector3<f32>; 8] = &[
 
 /// A value representing face direction.
 #[repr(usize)]
-#[derive(Copy, PartialEq, Eq, FromPrimitive, Debug)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug)]
 pub enum Face {
     /// Facing down.
-    Down = 0,
+    Down,
     /// Facing up.
-    Up = 1,
+    Up,
     /// Facing north.
-    North = 2,
+    North,
     /// Facing south.
-    South = 3,
+    South,
     /// Facing west.
-    West = 4,
+    West,
     /// Facing east.
-    East = 5
+    East
 }
 
 impl Face {
@@ -97,73 +97,82 @@ impl Face {
     /// Gets the direction of face.
     pub fn direction(self) -> [i32; 3] {
         match self {
-            Down => [0, -1, 0],
-            Up => [0, 1, 0],
-            North => [0, 0, -1],
-            South => [0, 0, 1],
-            West => [-1, 0, 0],
-            East => [1, 0, 0]
+            Down  => [ 0, -1,  0],
+            Up    => [ 0,  1,  0],
+            North => [ 0,  0, -1],
+            South => [ 0,  0,  1],
+            West  => [-1,  0,  0],
+            East  => [ 1,  0,  0]
         }
     }
 
     /// Gets the face in a specific direction.
-    pub fn from_direction(d: [i32; 3]) -> Option<Face> {
+    pub fn from_direction(d: [i32; 3]) -> Option<Self> {
         Some(match (d[0], d[1], d[2]) {
-            (0, -1, 0) => Down,
-            (0, 1, 0) => Up,
-            (0, 0, -1) => North,
-            (0, 0, 1) => South,
-            (-1, 0, 0) => West,
-            (1, 0, 0) => East,
+            ( 0, -1,  0) => Down,
+            ( 0,  1,  0) => Up,
+            ( 0,  0, -1) => North,
+            ( 0,  0,  1) => South,
+            (-1,  0,  0) => West,
+            ( 1,  0,  0) => East,
+            _ => return None
+        })
+    }
+
+    /// Convert number to face.
+    pub fn from_usize(number: usize) -> Option<Self> {
+        Some(match number {
+            0 => Down,
+            1 => Up,
+            2 => North,
+            3 => South,
+            4 => West,
+            5 => East,
             _ => return None
         })
     }
 }
 
-#[allow(missing_docs)]
-#[derive(Debug, Clone, PartialEq, Copy)]
+/// The error parsing face from string.
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ParseError;
 
 impl FromStr for Face {
     type Err = ParseError;
-    fn from_str(s: &str) -> Result<Face, ParseError> {
-        match s {
-            "down" => Ok(Down),
-            "up" => Ok(Up),
-            "north" => Ok(North),
-            "south" => Ok(South),
-            "west" => Ok(West),
-            "east" => Ok(East),
+    fn from_str(s: &str) -> Result<Self, <Self as FromStr>::Err> {
+        Ok(match s {
+            "down"  => Down,
+            "up"    => Up,
+            "north" => North,
+            "south" => South,
+            "west"  => West,
+            "east"  => East,
             _ => return Err(ParseError)
-        }
+        })
     }
 }
 
 /// Iterates through each face on a cube.
-#[derive(Copy)]
-pub struct FaceIterator {
-    face: usize,
-}
+#[derive(Copy, Clone)]
+pub struct FaceIterator(usize);
 
 impl FaceIterator {
     /// Creates a new face iterator.
-    pub fn new() -> FaceIterator {
-        FaceIterator {
-            face: 0
-        }
+    pub fn new() -> Self {
+        FaceIterator(0)
     }
 }
 
 impl Iterator for FaceIterator {
     type Item = Face;
 
-    fn next(&mut self) -> Option<Face> {
-        match self.face {
-            x if x < 6 => {
-                self.face += 1;
-                FromPrimitive::from_usize(x)
-            },
-            _ => None
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        let face = self.0;
+        if face < 6 {
+            self.0 += 1;
+            Face::from_usize(face)
+        } else {
+            None
         }
     }
 }
