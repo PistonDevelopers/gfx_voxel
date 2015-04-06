@@ -19,9 +19,7 @@ use image::{
     Pixel
 };
 
-pub use gfx_texture::Texture;
-pub use gfx_texture::ImageSize;
-pub use gfx_texture::Settings as TextureSettings;
+pub use gfx_texture::{ Texture, ImageSize, Settings };
 
 // Loads RGBA image from path.
 fn load_rgba8(path: &Path) -> ImageResult<RgbaImage> {
@@ -217,9 +215,9 @@ impl AtlasBuilder {
     }
 
     /// Returns the complete texture atlas as a texture.
-    pub fn complete<R, D>(self, device: &mut D) -> Texture<R>
-        where R: gfx::Resources, D: gfx::Factory<R>
+    pub fn complete<R, F>(self, factory: &mut F) -> Texture<R>
+        where R: gfx::Resources, F: gfx::Factory<R>
     {
-        Texture::from_image(device, &self.image, false, true)
+        Texture::from_image(factory, &self.image, false, true)
     }
 }
