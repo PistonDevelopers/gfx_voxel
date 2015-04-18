@@ -218,6 +218,6 @@ impl AtlasBuilder {
     pub fn complete<R, F>(self, factory: &mut F) -> Texture<R>
         where R: gfx::Resources, F: gfx::Factory<R>
     {
-        Texture::from_image(factory, &self.image, false, true)
+        Texture::from_image(factory, &self.image, false, false, true)
     }
 }
