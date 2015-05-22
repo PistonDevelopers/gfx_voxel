@@ -20,18 +20,18 @@ name = "gfx_voxel"
 
 [dependencies.piston-gfx_texture]
 git = "https://github.com/PistonDevelopers/gfx_texture"
-#version = "0.0.0"
+#version = "0.0.6"
 
 [dependencies.image]
 git = "https://github.com/PistonDevelopers/image"
 default-features = false
 features = ["png"]
-#version = "0.0.0"
+#version = "0.3.9"
 
 [dependencies.array]
 git = "https://github.com/PistonDevelopers/array"
-#version = "0.0.0"
+#version = "0.0.1"
 
 [dependencies.gfx]
 git = "https://github.com/gfx-rs/gfx-rs"
-#version = "0.0.0"
+#version = "0.5.2"
