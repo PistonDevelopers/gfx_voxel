@@ -37,7 +37,7 @@ pub use self::Face::{
     East,
 };
 
-// Cube faces (clockwise).
+/// Cube faces (clockwise).
 pub const QUADS: &'static [[usize; 4]; 6] = &[
     [1, 0, 5, 4], // down
     [7, 6, 3, 2], // up
@@ -47,7 +47,7 @@ pub const QUADS: &'static [[usize; 4]; 6] = &[
     [1, 4, 7, 2]  // east
 ];
 
-// Cube vertices.
+/// Cube vertices.
 pub const VERTICES: &'static [Vector3<f32>; 8] = &[
     // This is the north surface
     [0.0, 0.0, 0.0], // 0
