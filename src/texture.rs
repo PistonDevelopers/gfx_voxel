@@ -19,7 +19,7 @@ use image::{
     Pixel
 };
 
-pub use gfx_texture::{ Texture, ImageSize, Settings };
+pub use gfx_texture::{ Texture, ImageSize, TextureSettings };
 
 // Loads RGBA image from path.
 fn load_rgba8(path: &Path) -> ImageResult<RgbaImage> {
@@ -218,6 +218,7 @@ impl AtlasBuilder {
     pub fn complete<R, F>(self, factory: &mut F) -> Texture<R>
         where R: gfx::Resources, F: gfx::Factory<R>
     {
-        Texture::from_image(factory, &self.image, false, false, true)
+        let settings = TextureSettings::new().generate_mipmap(true);
+        Texture::from_image(factory, &self.image, &settings).unwrap()
     }
 }
