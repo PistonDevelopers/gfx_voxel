@@ -20,7 +20,7 @@ name = "gfx_voxel"
 
 [dependencies]
 array = "0.0.1"
-gfx = "0.13.1"
+gfx = "0.13.0"
 piston-gfx_texture = "0.20.0"
 
 [dependencies.image]
