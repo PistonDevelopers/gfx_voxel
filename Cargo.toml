@@ -1,7 +1,7 @@
 [package]
 
 name = "piston3d-gfx_voxel"
-version = "0.21.0"
+version = "0.22.0"
 authors = [
     "Ty Overby <ty@pre-alpha.com>",
     "eddyb",
@@ -22,9 +22,9 @@ name = "gfx_voxel"
 [dependencies]
 array = "0.0.1"
 gfx = "0.16.0"
-piston-gfx_texture = "0.28.0"
+piston-gfx_texture = "0.29.0"
 
 [dependencies.image]
-version = "0.16.0"
+version = "0.17.0"
 default-features = false
 features = ["png"]
