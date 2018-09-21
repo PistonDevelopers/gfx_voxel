@@ -15,7 +15,7 @@ use image::{
     ImageResult,
     SubImage,
     ImageError,
-    GenericImage,
+    GenericImageView,
     Pixel
 };
 
