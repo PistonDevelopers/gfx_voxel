@@ -6,7 +6,7 @@ use std::fmt::{ Debug, Formatter, Error };
 use std::path::{ Path, PathBuf };
 use std::mem;
 
-use gfx;
+use wgpu::{ Texture, TextureFormat, TextureDescriptor, TextureDimension, Device };
 use image::{
     self,
     ImageBuffer,
@@ -18,8 +18,6 @@ use image::{
     GenericImageView,
     Pixel
 };
-
-pub use gfx_texture::{ Texture, ImageSize, TextureSettings };
 
 // Loads RGBA image from path.
 fn load_rgba8(path: &Path) -> ImageResult<RgbaImage> {
@@ -214,11 +212,63 @@ impl AtlasBuilder {
         min_alpha
     }
 
+    /// Returns the _current_ atlas size.
+    /// Subject to change during every call to `load`!
+    pub fn get_size(&self) -> (u32, u32) {
+        self.image.dimensions()
+    }
+
     /// Returns the complete texture atlas as a texture.
-    pub fn complete<R, F>(self, factory: &mut F) -> Texture<R>
-        where R: gfx::Resources, F: gfx::Factory<R>
+    pub fn complete(self, device: &mut Device) -> Texture
     {
-        let settings = TextureSettings::new().generate_mipmap(true);
-        Texture::from_image(factory, &self.image, &settings).unwrap()
+        let size = self.image.dimensions();
+        let texture_extent = wgpu::Extent3d {
+            width: size.0,
+            height: size.1,
+            depth: 1,
+        };
+        let texture = device.create_texture(&TextureDescriptor {
+            size: texture_extent,
+            array_size: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm,
+            usage: wgpu::TextureUsageFlags::SAMPLED | wgpu::TextureUsageFlags::TRANSFER_DST,
+        });
+
+        let texels = self.image.into_raw();
+
+
+        let mut init_encoder =
+            device.create_command_encoder(&wgpu::CommandEncoderDescriptor { todo: 0 });
+        
+        let temp_buf = device
+            .create_buffer_mapped(texels.len(), wgpu::BufferUsageFlags::TRANSFER_SRC)
+            .fill_from_slice(&texels);
+        init_encoder.copy_buffer_to_texture(
+            wgpu::BufferCopyView {
+                buffer: &temp_buf,
+                offset: 0,
+                row_pitch: 4 * size.0,
+                image_height: size.1,
+            },
+            wgpu::TextureCopyView {
+                texture: &texture,
+                level: 0,
+                slice: 0,
+                origin: wgpu::Origin3d {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+            },
+            texture_extent,
+        );
+
+
+        // Done
+        let init_command_buf = init_encoder.finish();
+        device.get_queue().submit(&[init_command_buf]);
+
+        texture
     }
 }
