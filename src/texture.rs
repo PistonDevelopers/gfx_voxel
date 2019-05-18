@@ -228,11 +228,13 @@ impl AtlasBuilder {
             depth: 1,
         };
         let texture = device.create_texture(&TextureDescriptor {
+            array_layer_count: 1,
+            mip_level_count: 1,
+            sample_count: 1,
             size: texture_extent,
-            array_size: 1,
             dimension: TextureDimension::D2,
             format: TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsageFlags::SAMPLED | wgpu::TextureUsageFlags::TRANSFER_DST,
+            usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::TRANSFER_DST,
         });
 
         let texels = self.image.into_raw();
@@ -242,7 +244,7 @@ impl AtlasBuilder {
             device.create_command_encoder(&wgpu::CommandEncoderDescriptor { todo: 0 });
         
         let temp_buf = device
-            .create_buffer_mapped(texels.len(), wgpu::BufferUsageFlags::TRANSFER_SRC)
+            .create_buffer_mapped(texels.len(), wgpu::BufferUsage::TRANSFER_SRC)
             .fill_from_slice(&texels);
         init_encoder.copy_buffer_to_texture(
             wgpu::BufferCopyView {
@@ -253,8 +255,8 @@ impl AtlasBuilder {
             },
             wgpu::TextureCopyView {
                 texture: &texture,
-                level: 0,
-                slice: 0,
+                array_layer: 0,
+		mip_level: 0,
                 origin: wgpu::Origin3d {
                     x: 0.0,
                     y: 0.0,
