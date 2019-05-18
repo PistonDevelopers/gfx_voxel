@@ -36,4 +36,4 @@ wgpu = { git = "https://github.com/gfx-rs/wgpu-rs" }
 [dependencies.image]
 version = "0.21.0"
 default-features = false
-features = ["png"]
+features = ["png_codec"]
