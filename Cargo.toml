@@ -8,7 +8,7 @@ authors = [
     "Sven Nilsen <bvssvni@gmail.com>",
     "Magnus Larsen <imjustagan@gmail.com>"
 ]
-keywords = ["gfx", "3d", "voxel", "piston"]
+keywords = ["wgpu", "3d", "voxel", "piston"]
 description = "A voxel rendering library on top of ~~Gfx~~ wgpu-rs. See version 0.27.0 or earlier for gfx support"
 license = "MIT"
 readme = "README.md"
@@ -35,5 +35,5 @@ wgpu = { git = "https://github.com/gfx-rs/wgpu-rs" }
 
 [dependencies.image]
 version = "0.21.0"
-#default-features = false
+default-features = false
 features = ["png"]
