@@ -1,14 +1,15 @@
 [package]
 
 name = "piston3d-gfx_voxel"
-version = "0.27.0"
+version = "0.28.0"
 authors = [
     "Ty Overby <ty@pre-alpha.com>",
     "eddyb",
-    "Sven Nilsen <bvssvni@gmail.com>"
+    "Sven Nilsen <bvssvni@gmail.com>",
+    "Magnus Larsen <imjustagan@gmail.com>"
 ]
-keywords = ["gfx", "3d", "voxel", "piston"]
-description = "A voxel rendering library on top of Gfx"
+keywords = ["wgpu", "3d", "voxel", "piston"]
+description = "A voxel rendering library on top of ~~Gfx~~ wgpu-rs. See version 0.27.0 or earlier for gfx support"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/pistondevelopers/gfx_voxel.git"
@@ -19,12 +20,20 @@ documentation = "https://docs.rs/piston3d-gfx_voxel"
 
 name = "gfx_voxel"
 
+[features]
+default = []
+local = ["wgpu-native/local"]
+metal = ["wgpu/metal"]
+dx11 = ["wgpu/dx11"]
+dx12 = ["wgpu/dx12"]
+vulkan = ["wgpu/vulkan"]
+
 [dependencies]
 array = "0.0.1"
-gfx = "0.17.0"
-piston-gfx_texture = "0.35.0"
+wgpu-native = { git = "https://github.com/gfx-rs/wgpu" }
+wgpu = { git = "https://github.com/gfx-rs/wgpu-rs" }
 
 [dependencies.image]
 version = "0.21.0"
 default-features = false
-features = ["png"]
+features = ["png_codec"]

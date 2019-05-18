@@ -1,9 +1,8 @@
 #![deny(missing_docs)]
 
-//! A voxel rendering library on top of Gfx.
+//! A voxel rendering library on top of ~~Gfx~~ wgpu-rs.
 
-extern crate gfx_texture;
-extern crate gfx;
+extern crate wgpu;
 extern crate image;
 pub extern crate array;
 
