@@ -28,38 +28,30 @@ use std::str::FromStr;
 /// A 3D vector.
 pub type Vector3<T> = [T; 3];
 
-pub use self::Face::{
-    Down,
-    Up,
-    North,
-    South,
-    West,
-    East,
-};
+pub use self::Face::{Down, East, North, South, Up, West};
 
 /// Cube faces (clockwise).
-pub const QUADS: &'static [[usize; 4]; 6] = &[
+pub const QUADS: &[[usize; 4]; 6] = &[
     [1, 0, 5, 4], // down
     [7, 6, 3, 2], // up
     [0, 1, 2, 3], // north
     [4, 5, 6, 7], // south
     [5, 0, 3, 6], // west
-    [1, 4, 7, 2]  // east
+    [1, 4, 7, 2], // east
 ];
 
 /// Cube vertices.
-pub const VERTICES: &'static [Vector3<f32>; 8] = &[
+pub const VERTICES: &[Vector3<f32>; 8] = &[
     // This is the north surface
     [0.0, 0.0, 0.0], // 0
     [1.0, 0.0, 0.0], // 1
     [1.0, 1.0, 0.0], // 2
     [0.0, 1.0, 0.0], // 3
-
     // This is the south surface
     [1.0, 0.0, 1.0], // 4
     [0.0, 0.0, 1.0], // 5
     [0.0, 1.0, 1.0], // 6
-    [1.0, 1.0, 1.0]  // 7
+    [1.0, 1.0, 1.0], // 7
 ];
 
 /// A value representing face direction.
@@ -77,19 +69,17 @@ pub enum Face {
     /// Facing west.
     West,
     /// Facing east.
-    East
+    East,
 }
 
 impl Face {
     /// Computes vertices of the face.
     pub fn vertices(self, base: Vector3<f32>, scale: Vector3<f32>) -> [Vector3<f32>; 4] {
-        use array::*;
-
         QUADS[self as usize].map(|i| VERTICES[i]).map(|v| {
             [
                 base[0] + scale[0] * v[0],
                 base[1] + scale[1] * v[1],
-                base[2] + scale[2] * v[2]
+                base[2] + scale[2] * v[2],
             ]
         })
     }
@@ -97,25 +87,25 @@ impl Face {
     /// Gets the direction of face.
     pub fn direction(self) -> [i32; 3] {
         match self {
-            Down  => [ 0, -1,  0],
-            Up    => [ 0,  1,  0],
-            North => [ 0,  0, -1],
-            South => [ 0,  0,  1],
-            West  => [-1,  0,  0],
-            East  => [ 1,  0,  0]
+            Down => [0, -1, 0],
+            Up => [0, 1, 0],
+            North => [0, 0, -1],
+            South => [0, 0, 1],
+            West => [-1, 0, 0],
+            East => [1, 0, 0],
         }
     }
 
     /// Gets the face in a specific direction.
     pub fn from_direction(d: [i32; 3]) -> Option<Self> {
         Some(match (d[0], d[1], d[2]) {
-            ( 0, -1,  0) => Down,
-            ( 0,  1,  0) => Up,
-            ( 0,  0, -1) => North,
-            ( 0,  0,  1) => South,
-            (-1,  0,  0) => West,
-            ( 1,  0,  0) => East,
-            _ => return None
+            (0, -1, 0) => Down,
+            (0, 1, 0) => Up,
+            (0, 0, -1) => North,
+            (0, 0, 1) => South,
+            (-1, 0, 0) => West,
+            (1, 0, 0) => East,
+            _ => return None,
         })
     }
 
@@ -128,7 +118,7 @@ impl Face {
             3 => South,
             4 => West,
             5 => East,
-            _ => return None
+            _ => return None,
         })
     }
 }
@@ -141,13 +131,13 @@ impl FromStr for Face {
     type Err = ParseError;
     fn from_str(s: &str) -> Result<Self, <Self as FromStr>::Err> {
         Ok(match s {
-            "down"  => Down,
-            "up"    => Up,
+            "down" => Down,
+            "up" => Up,
             "north" => North,
             "south" => South,
-            "west"  => West,
-            "east"  => East,
-            _ => return Err(ParseError)
+            "west" => West,
+            "east" => East,
+            _ => return Err(ParseError),
         })
     }
 }

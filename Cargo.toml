@@ -2,6 +2,7 @@
 
 name = "piston3d-gfx_voxel"
 version = "0.27.0"
+edition = "2018"
 authors = [
     "Ty Overby <ty@pre-alpha.com>",
     "eddyb",
