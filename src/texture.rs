@@ -1,31 +1,24 @@
 //! Create textures and build texture atlas.
 
+use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
-use std::collections::hash_map::Entry::{ Occupied, Vacant };
-use std::fmt::{ Debug, Formatter, Error };
-use std::path::{ Path, PathBuf };
+use std::fmt::{Debug, Error, Formatter};
 use std::mem;
+use std::path::{Path, PathBuf};
 
 use gfx;
 use image::{
-    self,
-    ImageBuffer,
-    RgbaImage,
-    DynamicImage,
-    ImageResult,
+    self, DynamicImage, GenericImageView, ImageBuffer, ImageError, ImageResult, Pixel, RgbaImage,
     SubImage,
-    ImageError,
-    GenericImageView,
-    Pixel
 };
 
-pub use gfx_texture::{ Texture, ImageSize, TextureSettings };
+pub use gfx_texture::{ImageSize, Texture, TextureSettings};
 
 // Loads RGBA image from path.
 fn load_rgba8(path: &Path) -> ImageResult<RgbaImage> {
     image::open(path).map(|img| match img {
         DynamicImage::ImageRgba8(img) => img,
-        img => img.to_rgba()
+        img => img.to_rgba(),
     })
 }
 
@@ -35,15 +28,16 @@ pub enum ColorMapError {
     Img(ImageError),
 
     /// The image size error.
-    Size(u32, u32, String)
+    Size(u32, u32, String),
 }
 
 impl Debug for ColorMapError {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match *self {
             ColorMapError::Img(ref e) => e.fmt(f),
-            ColorMapError::Size(w, h, ref path) =>
+            ColorMapError::Size(w, h, ref path) => {
                 format!("ColorMap expected 256x256, found {}x{} in '{}'", w, h, path).fmt(f)
+            }
         }
     }
 }
@@ -60,13 +54,18 @@ pub struct ColorMap(RgbaImage);
 impl ColorMap {
     /// Creates a new `ColorMap` from path.
     pub fn from_path<P>(path: P) -> Result<Self, ColorMapError>
-        where P: AsRef<Path>
+    where
+        P: AsRef<Path>,
     {
-        let img = try!(load_rgba8(path.as_ref()));
+        let img = load_rgba8(path.as_ref())?;
 
         match img.dimensions() {
             (256, 256) => Ok(ColorMap(img)),
-            (w, h) => Err(ColorMapError::Size(w, h, path.as_ref().display().to_string()))
+            (w, h) => Err(ColorMapError::Size(
+                w,
+                h,
+                path.as_ref().display().to_string(),
+            )),
         }
     }
 
@@ -103,23 +102,24 @@ pub struct AtlasBuilder {
     // Position cache for loaded tiles (in pixels).
     tile_positions: HashMap<String, (u32, u32)>,
     // Lowest-alpha cache for rectangles in the atlas.
-    min_alpha_cache: HashMap<(u32, u32, u32, u32), u8>
+    min_alpha_cache: HashMap<(u32, u32, u32, u32), u8>,
 }
 
 impl AtlasBuilder {
     /// Creates a new `AtlasBuilder`.
     pub fn new<P>(path: P, unit_width: u32, unit_height: u32) -> Self
-        where P: Into<PathBuf>
+    where
+        P: Into<PathBuf>,
     {
         AtlasBuilder {
             image: ImageBuffer::new(unit_width * 4, unit_height * 4),
             path: path.into(),
-            unit_width: unit_width,
-            unit_height: unit_height,
+            unit_width,
+            unit_height,
             completed_tiles_size: 0,
             position: 0,
             tile_positions: HashMap::new(),
-            min_alpha_cache: HashMap::new()
+            min_alpha_cache: HashMap::new(),
         }
     }
 
@@ -129,7 +129,7 @@ impl AtlasBuilder {
     /// PNG is the only supported format.
     pub fn load(&mut self, name: &str) -> (u32, u32) {
         if let Some(&pos) = self.tile_positions.get(name) {
-            return pos
+            return pos;
         }
 
         let mut path = self.path.join(name);
@@ -140,7 +140,11 @@ impl AtlasBuilder {
         assert!(iw == self.unit_width);
         assert!((ih % self.unit_height) == 0);
         if ih > self.unit_height {
-            println!("ignoring {} extra frames in '{}'", (ih / self.unit_height) - 1, name);
+            println!(
+                "ignoring {} extra frames in '{}'",
+                (ih / self.unit_height) - 1,
+                name
+            );
         }
 
         let (uw, uh) = (self.unit_width, self.unit_height);
@@ -150,8 +154,8 @@ impl AtlasBuilder {
         // Expand the image buffer if necessary.
         if self.position == 0 && (uw * size >= w || uh * size >= h) {
             let old = mem::replace(&mut self.image, ImageBuffer::new(w * 2, h * 2));
-            for ix in 0 .. w {
-                for iy in 0 .. h {
+            for ix in 0..w {
+                for iy in 0..h {
                     *self.image.get_pixel_mut(ix, iy) = old[(ix, iy)];
                 }
             }
@@ -171,15 +175,15 @@ impl AtlasBuilder {
         };
 
         self.position += 1;
-        if self.position >= size * 2 + 1 {
+        if self.position > size * 2 {
             self.position = 0;
             self.completed_tiles_size += 1;
         }
 
         {
             let (x, y, w, h) = (x * uw, y * uh, uw, uh);
-            for ix in 0 .. w {
-                for iy in 0 .. h {
+            for ix in 0..w {
+                for iy in 0..h {
                     *self.image.get_pixel_mut(ix + x, iy + y) = img[(ix, iy)];
                 }
             }
@@ -194,7 +198,7 @@ impl AtlasBuilder {
 
         *match self.tile_positions.entry(name.to_string()) {
             Occupied(entry) => entry.into_mut(),
-            Vacant(entry) => entry.insert((x * uw, y * uh))
+            Vacant(entry) => entry.insert((x * uw, y * uh)),
         }
     }
 
@@ -205,7 +209,7 @@ impl AtlasBuilder {
         let w = rect[2];
         let h = rect[3];
         if let Some(&alpha) = self.min_alpha_cache.get(&(x, y, w, h)) {
-            return alpha
+            return alpha;
         }
 
         let tile = SubImage::new(&mut self.image, x, y, w, h);
@@ -216,7 +220,9 @@ impl AtlasBuilder {
 
     /// Returns the complete texture atlas as a texture.
     pub fn complete<R, F>(self, factory: &mut F) -> Texture<R>
-        where R: gfx::Resources, F: gfx::Factory<R>
+    where
+        R: gfx::Resources,
+        F: gfx::Factory<R>,
     {
         let settings = TextureSettings::new().generate_mipmap(true);
         Texture::from_image(factory, &self.image, &settings).unwrap()
